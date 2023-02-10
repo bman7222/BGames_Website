@@ -779,6 +779,7 @@ header .banner__image--container img {
     justify-content: center;
     flex-wrap: wrap;
     /* display: flex; */
+    /* display: flex; */
 }
 
 .projects__card{
