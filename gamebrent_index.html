@@ -556,6 +556,44 @@ function updateCursors(){
   });
 }
 
+const SCROLL_STEP = 48;
+const SCROLL_TOLERANCE = 2;
+
+function handleScrollDown() {
+  const sc = document.getElementById('screenContent');
+  if (!sc) return;
+
+  // only apply on non-menu pages
+  if (currentPage === 'menu') return;
+
+  const atBottom = sc.scrollTop + sc.clientHeight >= sc.scrollHeight - SCROLL_TOLERANCE;
+
+  if (atBottom) {
+    // wrap to top
+    sc.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    sc.scrollBy({ top: SCROLL_STEP, behavior: 'smooth' });
+  }
+}
+
+function handleScrollUp() {
+  const sc = document.getElementById('screenContent');
+  if (!sc) return;
+
+  // only apply on non-menu pages
+  if (currentPage === 'menu') return;
+
+  const atTop = sc.scrollTop <= SCROLL_TOLERANCE;
+
+  if (atTop) {
+    // wrap to bottom
+    const bottom = Math.max(sc.scrollHeight - sc.clientHeight, 0);
+    sc.scrollTo({ top: bottom, behavior: 'smooth' });
+  } else {
+    sc.scrollBy({ top: -SCROLL_STEP, behavior: 'smooth' });
+  }
+}
+
 // return page state
 let returnIndex = 0; // 0 = YES, 1 = NO
 
@@ -585,7 +623,7 @@ function navDown() {
     updateReturnCursors();
     return;
   } else {
-    if (typeof handleScrollDown === 'function') handleScrollDown();
+    handleScrollDown();
     return;
   }
 }
@@ -601,7 +639,7 @@ function navUp() {
     updateReturnCursors();
     return;
   } else {
-    if (typeof handleScrollUp === 'function') handleScrollUp();
+    handleScrollUp();
     return;
   }
 }
@@ -635,35 +673,6 @@ function handleB() {
   if (currentPage !== 'menu') showPage('menu');
 }
 
-function handleScrollDown(){
-  // existing scroll behavior for non-menu pages
-  if (currentPage !== 'menu') {
-    const atBottom = sc.scrollTop + sc.clientHeight >= sc.scrollHeight - 2;
-    if (atBottom) {
-      sc.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      sc.scrollBy({ top: 48, behavior: 'smooth' });
-    }
-    return;
-  }
-}
-
-function handleScrollUp() {
-  // only apply on non-menu pages (keeps menu behavior unchanged)
-  if (currentPage === 'menu') return;
-
-  const sc = document.getElementById('screenContent');
-  if (!sc) return;
-
-  // consider near‑top as top (small tolerance)
-  const atTop = sc.scrollTop <= 2;
-
-  if (!atTop) {
-    sc.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-}
-
-
 function handleSelect() {
   const sc = document.getElementById('screenContent');
 
@@ -674,11 +683,16 @@ function handleSelect() {
     return;
   }
 
-  handleScroll()
+  // If on menu, cycle menu cursor (no scrolling)
+  if (currentPage === 'menu') {
+    if (!Array.isArray(menuItems) || menuItems.length === 0) return;
+    menuIndex = (menuIndex + 1) % menuItems.length;
+    updateCursors();
+    return;
+  }
 
-  // if on menu, cycle menu cursor
-  menuIndex = (menuIndex + 1) % menuItems.length;
-  updateCursors();
+  // Otherwise, scroll down on select
+  handleScrollDown();
 }
 
 function handleStart() {
