@@ -1,240 +1,814 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>B-Games</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css> 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Kumbh+Sans:wght@400;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Brent Goldstein — B-Games</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── RESET & TOKENS ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green:   #0cf53f;
+      --green2:  #09c34a;
+      --blue:    #4837ff;
+      --bg:      #0d0d0d;
+      --bg2:     #131313;
+      --bg3:     #1a1a1a;
+      --text:    #e8e8e8;
+      --muted:   #888;
+      --border:  rgba(12,245,63,.15);
+      --radius:  6px;
+      --mono:    'Space Mono', monospace;
+      --sans:    'Syne', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    a { text-decoration: none; color: inherit; }
+
+    /* ─── SCROLLBAR ──────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--green2); border-radius: 2px; }
+
+    /* ─── NAV ────────────────────────────────────────────────────── */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 999;
+      height: 64px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 clamp(1rem, 5vw, 3rem);
+      background: rgba(13,13,13,.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav__logo {
+      font-family: var(--mono);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--green);
+      letter-spacing: -1px;
+      display: flex; align-items: center; gap: .4rem;
+    }
+    .nav__logo span { color: var(--text); }
+
+    .nav__links {
+      display: flex; align-items: center; gap: 2rem;
+      list-style: none;
+    }
+    .nav__links a {
+      font-family: var(--mono);
+      font-size: .8rem;
+      color: var(--muted);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      transition: color .2s;
+    }
+    .nav__links a:hover { color: var(--green); }
+
+    .nav__cta {
+      font-family: var(--mono);
+      font-size: .8rem;
+      font-weight: 700;
+      padding: .5rem 1.2rem;
+      background: var(--green);
+      color: #000;
+      border-radius: var(--radius);
+      letter-spacing: .05em;
+      transition: background .2s, transform .15s;
+    }
+    .nav__cta:hover { background: var(--green2); transform: translateY(-1px); }
+
+    /* hamburger */
+    .nav__hamburger {
+      display: none;
+      flex-direction: column; gap: 5px;
+      cursor: pointer; background: none; border: none; padding: 4px;
+    }
+    .nav__hamburger span {
+      display: block; width: 24px; height: 2px;
+      background: var(--text);
+      transition: all .3s;
+    }
+
+    /* mobile nav */
+    @media (max-width: 768px) {
+      .nav__hamburger { display: flex; }
+      .nav__links {
+        position: fixed; top: 64px; left: 0; right: 0;
+        flex-direction: column; gap: 0;
+        background: var(--bg2);
+        border-bottom: 1px solid var(--border);
+        max-height: 0; overflow: hidden;
+        transition: max-height .4s ease;
+      }
+      .nav__links.open { max-height: 400px; }
+      .nav__links li { width: 100%; }
+      .nav__links a {
+        display: block;
+        padding: 1rem 2rem;
+        font-size: .9rem;
+        border-bottom: 1px solid var(--border);
+      }
+      .nav__links .nav__cta {
+        margin: 1rem 2rem;
+        display: inline-block;
+        background: var(--green); color: #000;
+      }
+    }
+
+    /* ─── HERO ───────────────────────────────────────────────────── */
+    .hero {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 7rem clamp(1.5rem, 6vw, 6rem) 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* animated grid background */
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(12,245,63,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(12,245,63,.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+    }
+
+    /* glow */
+    .hero::after {
+      content: '';
+      position: absolute;
+      top: 20%; left: 50%;
+      transform: translateX(-50%);
+      width: 600px; height: 400px;
+      background: radial-gradient(ellipse, rgba(9,195,74,.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero__inner {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 4rem;
+      align-items: center;
+      max-width: 1100px;
+      width: 100%;
+      position: relative; z-index: 1;
+    }
+
+    .hero__tag {
+      display: inline-flex; align-items: center; gap: .5rem;
+      font-family: var(--mono); font-size: .75rem;
+      color: var(--green); letter-spacing: .1em; text-transform: uppercase;
+      border: 1px solid var(--border);
+      padding: .3rem .8rem; border-radius: 2rem;
+      margin-bottom: 1.5rem;
+      animation: fadeUp .6s ease both;
+    }
+    .hero__tag::before {
+      content: ''; width: 6px; height: 6px;
+      background: var(--green); border-radius: 50%;
+      animation: pulse 2s ease infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: .4; transform: scale(.7); }
+    }
+
+    .hero__name {
+      font-size: clamp(3rem, 8vw, 6rem);
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -3px;
+      color: #fff;
+      animation: fadeUp .6s .1s ease both;
+    }
+    .hero__name em {
+      font-style: normal;
+      background: linear-gradient(135deg, var(--green) 0%, var(--green2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero__roles {
+      display: flex; flex-wrap: wrap; gap: .6rem;
+      margin: 1.5rem 0 2rem;
+      animation: fadeUp .6s .2s ease both;
+    }
+    .hero__role {
+      font-family: var(--mono); font-size: .75rem;
+      color: var(--muted); letter-spacing: .06em;
+      padding: .3rem .8rem;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 4px;
+    }
+
+    .hero__desc {
+      font-size: 1.05rem;
+      color: var(--muted);
+      max-width: 520px;
+      line-height: 1.75;
+      animation: fadeUp .6s .3s ease both;
+    }
+
+    .hero__actions {
+      display: flex; flex-wrap: wrap; gap: 1rem;
+      margin-top: 2.5rem;
+      animation: fadeUp .6s .4s ease both;
+    }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: .5rem;
+      font-family: var(--mono); font-size: .85rem; font-weight: 700;
+      padding: .75rem 1.6rem;
+      border-radius: var(--radius);
+      transition: all .2s;
+      cursor: pointer; border: none;
+    }
+    .btn--primary {
+      background: var(--green); color: #000;
+    }
+    .btn--primary:hover { background: #fff; transform: translateY(-2px); }
+    .btn--outline {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,.2);
+      color: var(--text);
+    }
+    .btn--outline:hover { border-color: var(--green); color: var(--green); transform: translateY(-2px); }
+
+    .hero__social {
+      display: flex; gap: 1.2rem; margin-top: 2rem;
+      animation: fadeUp .6s .5s ease both;
+    }
+    .hero__social a {
+      color: var(--muted); font-size: 1.2rem;
+      transition: color .2s, transform .2s;
+    }
+    .hero__social a:hover { color: var(--green); transform: translateY(-3px); }
+
+    .hero__avatar {
+      width: 220px; height: 220px;
+      border-radius: 50%;
+      border: 2px solid var(--green);
+      object-fit: cover;
+      box-shadow: 0 0 40px rgba(12,245,63,.2);
+      animation: fadeUp .6s .2s ease both;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 768px) {
+      .hero__inner {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+      .hero__avatar {
+        width: 140px; height: 140px;
+        margin: 0 auto;
+        order: -1;
+      }
+      .hero__roles, .hero__actions, .hero__social { justify-content: center; }
+      .hero__desc { margin: 0 auto; }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── SECTION SHARED ─────────────────────────────────────────── */
+    .section {
+      padding: 6rem clamp(1.5rem, 6vw, 6rem);
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section__label {
+      font-family: var(--mono); font-size: .75rem;
+      color: var(--green); letter-spacing: .15em; text-transform: uppercase;
+      display: flex; align-items: center; gap: .6rem;
+      margin-bottom: 1rem;
+    }
+    .section__label::after {
+      content: ''; flex: 1; height: 1px;
+      background: var(--border);
+      max-width: 80px;
+    }
+
+    .section__title {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; letter-spacing: -1px;
+      color: #fff;
+      margin-bottom: 1rem;
+    }
+
+    /* ─── ABOUT ──────────────────────────────────────────────────── */
+    #about { border-top: 1px solid var(--border); }
+
+    .about__grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      margin-top: 3rem;
+      align-items: start;
+      min-width: 0;
+    }
+
+    .about__text p {
+      color: var(--muted);
+      line-height: 1.8;
+      margin-bottom: 1.2rem;
+    }
+    .about__text a { color: var(--green); }
+    .about__text a:hover { text-decoration: underline; }
+
+    .about__contact {
+      margin-top: 1.5rem;
+      display: flex; align-items: center; gap: .6rem;
+      font-family: var(--mono); font-size: .85rem;
+      color: var(--muted);
+    }
+    .about__contact i { color: var(--green); }
+
+    .skills {
+      width: 100%;
+      min-width: 0;
+      overflow: visible;
+    }
+
+    .skills__list {
+      display: flex; flex-wrap: wrap; gap: .5rem;
+      margin-top: 2rem;
+      align-items: flex-start;
+      align-content: flex-start;
+      max-width: 100%;
+    }
+    .skill-tag {
+      font-family: var(--mono); font-size: .72rem;
+      padding: .3rem .7rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--muted);
+      transition: border-color .2s, color .2s;
+      white-space: normal;
+      word-break: break-word; 
+      max-width: 14rem; 
+      box-sizing: border-box;
+    }
+    .skill-tag:hover { border-color: var(--green); color: var(--green); }
+
+    .about__ctas {
+      display: flex; gap: 1rem; flex-wrap: wrap;
+      margin-top: 2rem;
+    }
+
+    @media (max-width: 520px) {
+      .skill-tag { max-width: none; }
+    }
+
+    @media (max-width: 768px) {
+      .about__grid { grid-template-columns: 1fr; gap: 2rem; }
+      .skills { margin-top: 0.5rem; }
+    }
+
+    /* ─── PROJECTS / SERVICES ─────────────────────────────────────── */
+    #projects { border-top: 1px solid var(--border); }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+
+    .card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: transform .25s, border-color .25s, box-shadow .25s;
+      position: relative;
+    }
+    .card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(12,245,63,.4);
+      box-shadow: 0 20px 40px rgba(0,0,0,.4);
+    }
+
+    .card__img {
+      width: 100%; height: 200px;
+      object-fit: cover;
+      background: var(--bg3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 3rem; color: var(--green);
+    }
+
+    .card__body { padding: 1.5rem; }
+    .card__body h3 {
+      font-size: 1.15rem; font-weight: 700;
+      color: #fff; margin-bottom: .5rem;
+    }
+    .card__body p { color: var(--muted); font-size: .9rem; line-height: 1.6; }
+
+    .card__link {
+      display: inline-flex; align-items: center; gap: .4rem;
+      font-family: var(--mono); font-size: .75rem;
+      color: var(--green); margin-top: 1rem;
+      transition: gap .2s;
+    }
+    .card__link:hover { gap: .7rem; }
+
+    /* ─── STATS BAR ──────────────────────────────────────────────── */
+    .stats {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg2);
+    }
+    .stats__inner {
+      max-width: 1100px; margin: 0 auto;
+      padding: 3rem clamp(1.5rem, 6vw, 6rem);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 2rem;
+      text-align: center;
+    }
+    .stat__num {
+      font-size: 2.5rem; font-weight: 800;
+      color: var(--green); font-family: var(--mono);
+      line-height: 1;
+    }
+    .stat__label {
+      font-size: .8rem; color: var(--muted);
+      font-family: var(--mono); letter-spacing: .08em;
+      margin-top: .4rem; text-transform: uppercase;
+    }
+
+    /* ─── FOOTER ─────────────────────────────────────────────────── */
+    footer {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      padding: 3rem clamp(1.5rem, 6vw, 6rem);
+    }
+    .footer__inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 1.5rem;
+    }
+    .footer__logo {
+      font-family: var(--mono); font-size: 1.2rem;
+      font-weight: 700; color: var(--green);
+    }
+    .footer__rights {
+      font-family: var(--mono); font-size: .75rem;
+      color: var(--muted);
+    }
+    .footer__icons {
+      display: flex; gap: 1.2rem;
+    }
+    .footer__icons a {
+      color: var(--muted); font-size: 1.1rem;
+      transition: color .2s;
+    }
+    .footer__icons a:hover { color: var(--green); }
+
+    /* ─── MISC UTILITY ───────────────────────────────────────────── */
+    .divider {
+      width: 40px; height: 3px;
+      background: var(--green);
+      border-radius: 2px;
+      margin: 1rem 0 1.5rem;
+    }
+
+  </style>
 </head>
 <body>
-    <!-- nav bar section-->
-    <nav class="navbar">
-        <div class="navbar__container">
-            <a href="#home" id="navbar__logo">
-                <i class="fa-sharp fa-solid fa-b"></i>
-            </a>
-            <div class="navbar__toggle" id="mobile-menu">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
-            </div>
-            <ul class="navbar__menu">
-                <li class="navbar__item">
-                        <a href="#home" class="navbar__links">
-                            Home
-                        </a>
-                </li>
-                <li class="navbar__item">
-                    <a href="#about" class="navbar__links">
-                        About
-                    </a>
-            </li>
-                <li class="navbar__item">
-                    <a href="Brent_Goldstein_Resume.pdf" target="_blank" class="navbar__links">
-                        Resume
-                    </a>
-            </li>
-            <li class="navbar__item">
-                <a href="https://www.linkedin.com/in/brent-goldstein-638aa41b7/"  target="_blank" class="navbar__links">
-                    LinkedIn 
-                </a>
-        </li>
-        <li class="navbar__btn">
-            <a href="https://gorillabman.itch.io/" target="_blank" class="button">
-                Projects
-            </a>
-    </li>
-            </ul>
+
+  <!-- ── NAV ─────────────────────────────────────────────────────── -->
+  <nav class="nav">
+    <a href="#home" class="nav__logo">B<span>-Games</span></a>
+
+    <button class="nav__hamburger" id="hamburger" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+
+    <ul class="nav__links" id="navLinks">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="Brent_Goldstein_Resume.pdf" target="_blank">Resume</a></li>
+      <li><a href="https://www.linkedin.com/in/brent-goldstein-638aa41b7/" target="_blank">LinkedIn</a></li>
+      <li><a href="gamebrent_index.html" target="_blank">GameBrent</a></li>
+      <li><a href="https://gorillabman.itch.io/" target="_blank" class="nav__cta">
+        <i class="fa-brands fa-itch-io"></i> Projects
+      </a></li>
+    </ul>
+  </nav>
+
+  <!-- ── HERO ────────────────────────────────────────────────────── -->
+  <section id="home" class="hero">
+    <div class="hero__inner">
+      <div>
+        <span class="hero__tag">Available for hire</span>
+        <h1 class="hero__name">Brent<br><em>Goldstein</em></h1>
+        <div class="hero__roles">
+          <span class="hero__role">Machine Learning and Data Science</span>
+          <span class="hero__role">Software Engineer</span>
+          <span class="hero__role">Game Designer</span>
+          <span class="hero__role">Sole Proprietor</span>
         </div>
-    </nav>
-
-    <!-- Header Banner -->
-    <header id="home"> 
-    <div class="row banner">
-        <div class="banner__image--container">
-            <img src="images/pfp1.PNG" alt="pic" id="banner__img">
-        </div>
-        <div class="banner-text">
-           <h1 class="responsive-headline">Brent Goldstein</h1>
-           <h3> <span>Software Engineer</span> | <span>Game Designer</span> | <span>Sole Proprietor</span></h3>
-           <h3><span><span></h3>
-           <hr />
-           <ul class="social">
-              <li><a href="https://github.com/bman7222"  target="_blank"><i class="fab fa-github"></i></a></li>
-              <li><a href="https://www.linkedin.com/in/brent-goldstein-638aa41b7/"  target="_blank"><i class="fab fa-linkedin"></i></a></li>
-              <li><a href="https://gorillabman.itch.io/"  target="_blank"><i class="fa-brands fa-itch-io"></i></a></li>
-              <li><a href="mailto:bman7222@icloud.com"><i class="fa fa-envelope"></i></a></li>
-           </ul>
-        </div>
-     </div>
-    </header>
-    <!-- end of header banner -->
-
-     <!--Hero section-->
-     <div class="main">
-        <div class="main__container">
-            <div class="main__content">
-                <h1>B-Games</h1>
-                <h2>Sole Proprietorship</h2>
-                <p>Games and Software</p>
-                <button class="main__btn"><a href="https://gorillabman.itch.io/"  target="_blank">View Projects</a></button>
-            </div>
-            <div class="main__img--container">
-                <img src="images/pic1.svg" alt="pic" id="main__img">
-            </div>
-        </div>
-     </div>
-
-     <!--Services -->
-     <div class="services">
-        <h1>See what the hype is about</h1>
-        <div class="services__container">
-            <div class="services__card">
-                <a href="#about" class="navbar__links">
-                </a>
-                <h2>About the company</h2>
-                <p>Find out about our passion</p>
-                <button>Get Started</button>
-            </div>
-            <div class="services__card">
-                <a href="#about" class="navbar__links">
-                </a>
-                <h2>About the owner</h2>
-                <p>Stop by and say hi</p>
-                <button>Get Started</button>
-            </div>
-        </div>
-     </div>
-
-     <!-- about section
-   ================================================== -->
-   <section id="about">  
-
-    <div class="row section-intro">
-       <div class="col-twelve">
-
-          <h1>About the company</h5>
-
-          <div class="intro-info">
-
-             <p class="lead">Our mission is to create fun and innovative games that inspire people across the world. We put passion into programming, in order to develop games and software which bring imagination to life. B-Games is a sole proprietorship owned by Brent Maxwell Goldstein. B-Games has completed many projects and game jams which are viewable on our <a href="https://github.com/bman7222"  target="_blank">GitHub</a> and <a href="https://gorillabman.itch.io/" target="_blank">Itch.io</a></p>
-          </div>            
-
-       </div>         
-    </div> <!-- /section-intro -->
-
-    <div class="row about-content">
-
-       <div class="col-six tab-full">
-
-          <h1>About the owner</h1>
-          <p>Hi, my name is Brent Goldstien and I am the owner B-Games. I created B-Games in my junior year of high school, September 2019, and have been expanding it ever since. 
-            I am a passionate programmer with experience in algorithms, data structures, computer organization, principles of software, operating systems, programming languages,
-            and even worked as a software engineering intern for Warner Bros. Games Central Game Technology and learned much about automated unit testing and frameworks. I am also a game designer, developing multiple publically available projects and completing many game jams with the RPI Game Jam Club.
-            I am a rising Senior at Rensselaer Polytechnic Institute.
+        <p class="hero__desc">
+          Passionate programmer and game developer behind <strong style="color:#fff">B-Games</strong>. 
+          Building fun, innovative games and software — from game jams to shipped products.
         </p>
-        <h2>Skills</h2>
-        <p> I am experienced in
-            C | C++ | C# | Java | Javascript | HTML | CSS | Prolog | MIPS | Scheme | Haskell |Operating Systems (Windows, Mac OS X, Linux, Ubuntu) | IDE’s (Visual Studio, VS Code, Rider, Eclipse) | Game Engines
-            (Unreal Engine 4, Visual Studio, Godot, Game Maker Studio 2) | Version Control (Perforce, Git, GitHub) | Microsoft Office
-            (Word, Excel, Powerpoint) | Adobe (Photoshop, Illustrator, Premier) | Testing Automation Tools (Gauntlet, Junit, Microsoft Unit
-            Testing Framework for C++) | Clip Studio Paint | Blender | ImGui
-            Projects can be seen and played on my <a href="https://github.com/bman7222"  target="_blank">GitHub</a> and <a href="https://gorillabman.itch.io/" target="_blank">Itch.io</a></p>
-
-          <ul class="info-list">
-
-                <strong>Email:</strong>
-                <span>bman7222@icloud.com</span>
-             
-
-          </ul> <!-- /info-list -->
-
-       </div>
-
-    </div>
-
-    <div class="row button-section">
-       <div class="col-twelve">
-        <ul class="about__menu">
-          <a href="https://www.linkedin.com/in/brent-goldstein-638aa41b7/"  target="_blank" title="Hire Me" class="button stroke smoothscroll">Hire Me</a>
-          <a href="/Brent_Goldstein_Resume.pdf" title="Download My CV" target="_blank" title="Hire Me" class="button stroke smoothscroll">Download My CV</a>
-       </div>         
-    </div>
- </section> <!-- /process-->    
-
-
-     <!--Footer Section-->
-
-     <div class="footer__container">
-        <!-- <div class="footer__links">
-            <div class="footer__link--wrapper">
-                <div class="footer__link--items">
-                    <h2>About us</h2>
-                    <a href="/">How it works</a>
-                    <a href="/">Testimonials</a>
-                    <a href="/">Careers</a>
-                    <a href="/">Investments</a>
-                    <a href="/">Terms of Service</a>
-                </div>
-                <div class="footer__link--items">
-                    <h2>About us</h2>
-                    <a href="/">How it works</a>
-                    <a href="/">Testimonials</a>
-                    <a href="/">Careers</a>
-                    <a href="/">Investments</a>
-                    <a href="/">Terms of Service</a>
-                </div>
-            </div>
-            <div class="footer__link--wrapper">
-                <div class="footer__link--items">
-                    <h2>About us</h2>
-                    <a href="/">How it works</a>
-                    <a href="/">Testimonials</a>
-                    <a href="/">Careers</a>
-                    <a href="/">Investments</a>
-                    <a href="/">Terms of Service</a>
-                </div>
-                <div class="footer__link--items">
-                    <h2>About us</h2>
-                    <a href="/">How it works</a>
-                    <a href="/">Testimonials</a>
-                    <a href="/">Careers</a>
-                    <a href="/">Investments</a>
-                    <a href="/">Terms of Service</a>
-                </div>
-            </div>
-        </div> -->
-        <div class="social__media">
-            <div class="social__media--wrap">
-                <div class="footer__logo">
-                    <a href="/" id="footer__logo">
-                        <i class="fa-sharp fa-solid fa-b"></i>
-                </div>
-                <p class="website__rights">© B-Games 2023. All rights reserved</p>
-                <div class="social__icons">
-                    <a href="https://github.com/bman7222" class="social__icons--link" target="_blank">
-                        <i class="fab fa-github"></i>
-                    </a>
-                    <a href="https://www.linkedin.com/in/brent-goldstein-638aa41b7/" class="social__icons--link" target="_blank">
-                        <i class="fab fa-linkedin"></i>
-                    </a>
-                    <a href="https://gorillabman.itch.io/" class="social__icons--link" target="_blank">
-                        <i class="fa-brands fa-itch-io"></i>
-                    </a>
-                    <a href="mailto:bman7222@icloud.com"  class="social__icons--link">
-                        <i class="fa fa-envelope"></i>
-                    </a>
-                </div>
-            </div>
+        <div class="hero__actions">
+          <a href="https://gorillabman.itch.io/" target="_blank" class="btn btn--primary">
+            <i class="fa-brands fa-itch-io"></i> View Projects
+          </a>
+          <a href="Brent_Goldstein_Resume.pdf" target="_blank" class="btn btn--outline">
+            <i class="fa-solid fa-file-arrow-down"></i> Download CV
+          </a>
         </div>
-     
+        <div class="hero__social">
+          <a href="https://github.com/bman7222" target="_blank" aria-label="GitHub"><i class="fab fa-github"></i></a>
+          <a href="https://www.linkedin.com/in/brent-goldstein-638aa41b7/" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+          <a href="https://gorillabman.itch.io/" target="_blank" aria-label="Itch.io"><i class="fa-brands fa-itch-io"></i></a>
+          <a href="mailto:bman7222@icloud.com" aria-label="Email"><i class="fa fa-envelope"></i></a>
+        </div>
+      </div>
+      <img src="images/pfp1.PNG" alt="Brent Goldstein" class="hero__avatar" />
     </div>
+  </section>
 
-    <script src="app.js"></script>
+  <!-- ── STATS ────────────────────────────────────────────────────── -->
+  <div class="stats">
+    <div class="stats__inner">
+      <div>
+        <div class="stat__num">10+</div>
+        <div class="stat__label">Projects Shipped</div>
+      </div>
+      <div>
+        <div class="stat__num">3+</div>
+        <div class="stat__label">Years Experience</div>
+      </div>
+      <div>
+        <div class="stat__num">1</div>
+        <div class="stat__label">Game Jam Club</div>
+      </div>
+      <div>
+        <div class="stat__num">∞</div>
+        <div class="stat__label">Passion</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ABOUT ────────────────────────────────────────────────────── -->
+  <section id="about">
+    <div class="section">
+      <p class="section__label">01 — About</p>
+      <h2 class="section__title">The Studio & The Maker</h2>
+      <div class="divider"></div>
+
+      <div class="about__grid">
+        <div class="about__text">
+          <h3 style="color:#fff; font-size:1.2rem; margin-bottom:1rem;">B-Games</h3>
+          <p>Our mission is to create fun and innovative games that inspire people across the world. We put passion into programming, developing games and software that bring imagination to life.</p>
+          <p>B-Games is a sole proprietorship founded by Brent Maxwell Goldstein. Projects and game jams are viewable on <a href="https://github.com/bman7222" target="_blank">GitHub</a> and <a href="https://gorillabman.itch.io/" target="_blank">Itch.io</a>.</p>
+
+          <h3 style="color:#fff; font-size:1.2rem; margin: 2rem 0 1rem;">Hi, I'm Brent</h3>
+          <p>I created B-Games in September 2019 during my junior year of high school and have been expanding it ever since. I'm a passionate programmer with deep experience in algorithms, data structures, computer organization, and software engineering principles.</p>
+          <p>I interned at <strong style="color:#fff">Warner Bros. Games Central Game Technology</strong> where I worked on automated unit testing and frameworks. I'm also an active game designer who has completed many game jams with the RPI Game Jam Club.</p>
+
+          <div class="about__contact">
+            <i class="fa fa-envelope"></i> bman7222@icloud.com
+          </div>
+
+          <div class="about__ctas">
+            <a href="https://www.linkedin.com/in/brent-goldstein-638aa41b7/" target="_blank" class="btn btn--outline">Hire Me</a>
+            <a href="Brent_Goldstein_Resume.pdf" target="_blank" class="btn btn--outline">Download CV</a>
+          </div>
+        </div>
+
+        <div class="skills" aria-label="Skills">
+          <h3 style="color:#fff; font-size:1.1rem; margin-bottom:1rem; font-family:var(--font-mono);">// Skills</h3>
+        
+          <div class="skills__list" role="list">
+            <!-- Programming Languages -->
+            <span class="skill-tag" role="listitem" data-category="Programming Language" title="Programming Language">C</span>
+            <span class="skill-tag" role="listitem" data-category="Programming Language" title="Programming Language">C++</span>
+            <span class="skill-tag" role="listitem" data-category="Programming Language" title="Programming Language">C#</span>
+            <span class="skill-tag" role="listitem" data-category="Programming Language" title="Programming Language">Java</span>
+            <span class="skill-tag" role="listitem" data-category="Programming Language" title="Programming Language">Python</span>
+            <span class="skill-tag" role="listitem" data-category="Programming Language" title="Programming Language">JavaScript</span>
+            <span class="skill-tag" role="listitem" data-category="Programming Language" title="Programming Language">TypeScript</span>
+            <span class="skill-tag" role="listitem" data-category="Programming Language" title="Programming Language">SQL</span>
+            <span class="skill-tag" role="listitem" data-category="Programming Language" title="Programming Language">HTML/CSS</span>
+            <span class="skill-tag" role="listitem" data-category="Programming Language" title="Programming Language">Flutterflow</span>
+            <span class="skill-tag" role="listitem" data-category="Programming Language" title="Programming Language">MIPS</span>
+            <span class="skill-tag" role="listitem" data-category="Programming Language" title="Programming Language">Haskell</span>
+            <span class="skill-tag" role="listitem" data-category="Programming Language" title="Programming Language">Scheme</span>
+            <span class="skill-tag" role="listitem" data-category="Programming Language" title="Programming Language">Prolog</span>
+        
+            <!-- Game Engines and Game Dev -->
+            <span class="skill-tag" role="listitem" data-category="Game Engine" title="Game Engine">Unreal Engine 4</span>
+            <span class="skill-tag" role="listitem" data-category="Game Engine" title="Game Engine">Godot</span>
+            <span class="skill-tag" role="listitem" data-category="Game Engine" title="Game Engine">Game Maker Studio 2</span>
+            <span class="skill-tag" role="listitem" data-category="Game Engine" title="Game Engine">Unity / VS</span>
+            <span class="skill-tag" role="listitem" data-category="Game Dev Tools" title="Game Dev Tools">ImGui</span>
+        
+            <!-- OS and IDEs -->
+            <span class="skill-tag" role="listitem" data-category="OS IDE" title="Operating System or IDE">Windows</span>
+            <span class="skill-tag" role="listitem" data-category="OS IDE" title="Operating System or IDE">macOS</span>
+            <span class="skill-tag" role="listitem" data-category="OS IDE" title="Operating System or IDE">Linux</span>
+            <span class="skill-tag" role="listitem" data-category="OS IDE" title="Operating System or IDE">Ubuntu</span>
+            <span class="skill-tag" role="listitem" data-category="OS IDE" title="Operating System or IDE">Visual Studio</span>
+            <span class="skill-tag" role="listitem" data-category="OS IDE" title="Operating System or IDE">VS Code</span>
+            <span class="skill-tag" role="listitem" data-category="OS IDE" title="Operating System or IDE">Rider</span>
+            <span class="skill-tag" role="listitem" data-category="OS IDE" title="Operating System or IDE">Eclipse</span>
+        
+            <!-- Version Control & Artifacts -->
+            <span class="skill-tag" role="listitem" data-category="Version Control" title="Version Control">Git</span>
+            <span class="skill-tag" role="listitem" data-category="Version Control" title="Version Control">GitHub</span>
+            <span class="skill-tag" role="listitem" data-category="Version Control" title="Version Control">Bitbucket</span>
+            <span class="skill-tag" role="listitem" data-category="Version Control" title="Version Control">Perforce</span>
+            <span class="skill-tag" role="listitem" data-category="Artifacts" title="Artifact Repositories">JFrog</span>
+        
+            <!-- Cloud & MLOps -->
+            <span class="skill-tag" role="listitem" data-category="Cloud" title="Cloud & MLOps">AWS</span>
+            <span class="skill-tag" role="listitem" data-category="Cloud" title="Cloud & MLOps">SageMaker</span>
+            <span class="skill-tag" role="listitem" data-category="Cloud" title="Cloud & MLOps">Azure</span>
+            <span class="skill-tag" role="listitem" data-category="Cloud" title="Cloud & MLOps">GCP</span>
+            <span class="skill-tag" role="listitem" data-category="Cloud" title="Cloud & MLOps">Databricks</span>
+            <span class="skill-tag" role="listitem" data-category="Cloud" title="Cloud & MLOps">Unity Catalog</span>
+            <span class="skill-tag" role="listitem" data-category="Cloud" title="Cloud & MLOps">Mlflow</span>
+            <span class="skill-tag" role="listitem" data-category="Cloud" title="Cloud & MLOps">Arize</span>
+            <span class="skill-tag" role="listitem" data-category="Cloud" title="Cloud & MLOps">Fiddler</span>
+        
+            <!-- Containers & Orchestration -->
+            <span class="skill-tag" role="listitem" data-category="Containers" title="Containers & Orchestration">Docker</span>
+            <span class="skill-tag" role="listitem" data-category="Containers" title="Containers & Orchestration">Kubernetes</span>
+            <span class="skill-tag" role="listitem" data-category="Containers" title="Containers & Orchestration">Helm</span>
+            <span class="skill-tag" role="listitem" data-category="Containers" title="Containers & Orchestration">kubectl</span>
+            <span class="skill-tag" role="listitem" data-category="Containers" title="Containers & Orchestration">Terraform</span>
+        
+            <!-- CI/CD & Automation -->
+            <span class="skill-tag" role="listitem" data-category="CI/CD" title="CI/CD & Automation">Jenkins</span>
+            <span class="skill-tag" role="listitem" data-category="CI/CD" title="CI/CD & Automation">CI/CD pipelines</span>
+            <span class="skill-tag" role="listitem" data-category="CI/CD" title="CI/CD & Automation">Automated testing</span>
+            <span class="skill-tag" role="listitem" data-category="CI/CD" title="CI/CD & Automation">Gauntlet</span>
+            <span class="skill-tag" role="listitem" data-category="CI/CD" title="CI/CD & Automation">JUnit</span>
+            <span class="skill-tag" role="listitem" data-category="CI/CD" title="CI/CD & Automation">MS Unit Testing</span>
+            <span class="skill-tag" role="listitem" data-category="CI/CD" title="CI/CD & Automation">MS C++ Unit Test</span>
+        
+            <!-- ML, Data Science, APIs & Frameworks -->
+            <span class="skill-tag" role="listitem" data-category="ML Data" title="Machine Learning & Frameworks">Machine Learning</span>
+            <span class="skill-tag" role="listitem" data-category="ML Data" title="Machine Learning & Frameworks">Deep Learning</span>
+            <span class="skill-tag" role="listitem" data-category="ML Data" title="Machine Learning & Frameworks">PyTorch</span>
+            <span class="skill-tag" role="listitem" data-category="ML Data" title="Machine Learning & Frameworks">TensorFlow</span>
+            <span class="skill-tag" role="listitem" data-category="ML Data" title="Machine Learning & Frameworks">Scikit-learn</span>
+            <span class="skill-tag" role="listitem" data-category="ML Data" title="Machine Learning & Frameworks">NLP</span>
+            <span class="skill-tag" role="listitem" data-category="ML Data" title="Machine Learning & Frameworks">Embedding Models</span>
+            <span class="skill-tag" role="listitem" data-category="ML Data" title="Machine Learning & Frameworks">Vector Indexing</span>
+            <span class="skill-tag" role="listitem" data-category="ML Data" title="Machine Learning & Frameworks">Flask</span>
+            <span class="skill-tag" role="listitem" data-category="ML Data" title="Machine Learning & Frameworks">REST APIs</span>
+            <span class="skill-tag" role="listitem" data-category="ML Data" title="Machine Learning & Frameworks">Postman</span>
+            <span class="skill-tag" role="listitem" data-category="ML Data" title="Machine Learning & Frameworks">OpenAI</span>
+            <span class="skill-tag" role="listitem" data-category="ML Data" title="Machine Learning & Frameworks">Anthropic Claude</span>
+        
+            <!-- Data, Visualization, and Development Lifecycle -->
+            <span class="skill-tag" role="listitem" data-category="Data Viz" title="Data & Visualization">Pandas</span>
+            <span class="skill-tag" role="listitem" data-category="Data Viz" title="Data & Visualization">NumPy</span>
+            <span class="skill-tag" role="listitem" data-category="Data Viz" title="Data & Visualization">Matplotlib</span>
+            <span class="skill-tag" role="listitem" data-category="Data Viz" title="Data & Visualization">Seaborn</span>
+            <span class="skill-tag" role="listitem" data-category="Data Viz" title="Data & Visualization">Tableau</span>
+            <span class="skill-tag" role="listitem" data-category="Data Viz" title="Data & Visualization">Power BI</span>
+            <span class="skill-tag" role="listitem" data-category="Data Viz" title="Data & Visualization">Streamlit</span>
+            <span class="skill-tag" role="listitem" data-category="Process" title="Process & Tools">Agile</span>
+            <span class="skill-tag" role="listitem" data-category="Process" title="Process & Tools">JIRA</span>
+            <span class="skill-tag" role="listitem" data-category="Process" title="Process & Tools">OpsGenie</span>
+            <span class="skill-tag" role="listitem" data-category="Process" title="Process & Tools">Miro</span>
+        
+            <!-- Web / Frontend frameworks -->
+            <span class="skill-tag" role="listitem" data-category="Web" title="Web Frameworks">Node.js</span>
+            <span class="skill-tag" role="listitem" data-category="Web" title="Web Frameworks">React</span>
+        
+            <!-- Art and Design Tools -->
+            <span class="skill-tag" role="listitem" data-category="Art Tool" title="Art and Design Tools">Blender</span>
+            <span class="skill-tag" role="listitem" data-category="Art Tool" title="Art and Design Tools">Photoshop</span>
+            <span class="skill-tag" role="listitem" data-category="Art Tool" title="Art and Design Tools">Illustrator</span>
+            <span class="skill-tag" role="listitem" data-category="Art Tool" title="Art and Design Tools">Clip Studio Paint</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PROJECTS ──────────────────────────────────────────────────── -->
+  <section id="projects">
+    <div class="section">
+      <p class="section__label">02 — Work</p>
+      <h2 class="section__title">Projects & Games</h2>
+      <div class="divider"></div>
+      <p style="color:var(--muted); max-width:520px;">
+        A selection of games and software built through game jams, personal projects, and professional work. 
+        View the full catalogue on Itch.io and GitHub.
+      </p>
+
+      <div class="cards">
+        <div class="card">
+          <div class="card__img"><i class="fa-solid fa-gamepad"></i></div>
+          <div class="card__body">
+            <h3>Game Jam Projects</h3>
+            <p>Multiple shipped games built under time constraints with the RPI Game Jam Club — creativity and execution under pressure.</p>
+            <a href="https://gorillabman.itch.io/" target="_blank" class="card__link">View on Itch.io <i class="fa-solid fa-arrow-right"></i></a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card__img"><i class="fa-brands fa-github"></i></div>
+          <div class="card__body">
+            <h3>Open Source Work</h3>
+            <p>Explore code repos spanning game engines, tools, and experiments. From Godot to Unreal Engine 4.</p>
+            <a href="https://github.com/bman7222" target="_blank" class="card__link">View on GitHub <i class="fa-solid fa-arrow-right"></i></a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card__img"><i class="fa-solid fa-briefcase"></i></div>
+          <div class="card__body">
+            <h3>ADP Machine Learning and Data Science</h3>
+            <p>Dashboards, Model Registration Pipelines, Leading and Guiding Teams Across Multiple Platforms</p>
+            <a href="https://www.linkedin.com/in/brent-goldstein-638aa41b7/" target="_blank" class="card__link">View LinkedIn <i class="fa-solid fa-arrow-right"></i></a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card__img"><i class="fa-solid fa-briefcase"></i></div>
+          <div class="card__body">
+            <h3>Warner Bros. Games Internship</h3>
+            <p>Contributed to Central Game Technology — building automated testing pipelines with Gauntlet and C++ unit testing frameworks.</p>
+            <a href="https://www.linkedin.com/in/brent-goldstein-638aa41b7/" target="_blank" class="card__link">View LinkedIn <i class="fa-solid fa-arrow-right"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ────────────────────────────────────────────────────── -->
+  <footer>
+    <div class="footer__inner">
+      <span class="footer__logo">B-Games</span>
+      <span class="footer__rights">© B-Games 2025. All rights reserved.</span>
+      <div class="footer__icons">
+        <a href="https://github.com/bman7222" target="_blank" aria-label="GitHub"><i class="fab fa-github"></i></a>
+        <a href="https://www.linkedin.com/in/brent-goldstein-638aa41b7/" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+        <a href="https://gorillabman.itch.io/" target="_blank" aria-label="Itch.io"><i class="fa-brands fa-itch-io"></i></a>
+        <a href="mailto:bman7222@icloud.com" aria-label="Email"><i class="fa fa-envelope"></i></a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Mobile nav toggle
+    const hamburger = document.getElementById('hamburger');
+    const navLinks  = document.getElementById('navLinks');
+    hamburger.addEventListener('click', () => {
+      navLinks.classList.toggle('open');
+      hamburger.classList.toggle('open');
+    });
+    // Close on link click
+    navLinks.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => navLinks.classList.remove('open'));
+    });
+
+    // Fade-in on scroll
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.style.opacity = '1';
+          e.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.card, .stat__num, .skill-tag').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(16px)';
+      el.style.transition = 'opacity .5s ease, transform .5s ease';
+      observer.observe(el);
+    });
+  </script>
 </body>
 </html>

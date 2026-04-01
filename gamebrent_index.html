@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>B-Games — Brent Goldstein</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gb-body:#c8c8b0;
+  --gb-body-dark:#a8a896;
+  --gb-body-shadow:#888878;
+  --gb-screen-bezel:#2a2a2a;
+  --gb-screen-bg:#8bac0f;
+  --gb-screen-dark:#306230;
+  --gb-screen-lightest:#e0f8cf;
+  --gb-dpad:#2a2060;
+  --gb-ab:#1e6fbf;
+  --gb-ab-dark:#154f8f;
+  --gb-start-sel:#555545;
+  --gb-speaker:#aaa898;
+  --gb-led:#cc0000;
+  --gb-led-glow:#ff4444;
+  --gb-label:#333320;
+  --pixel:'Press Start 2P',monospace;
+  --vt:'VT323',monospace;
+}
+html,body{
+  min-height:100%;
+  background:#1a1a2e;
+  background-image:
+    radial-gradient(ellipse at 20% 50%,rgba(72,61,139,.3) 0%,transparent 60%),
+    radial-gradient(ellipse at 80% 20%,rgba(26,26,46,.8) 0%,transparent 60%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:2rem 1rem 4rem;
+  font-family:var(--pixel);
+}
+.page-title{
+  color:#9bbc0f;
+  font-size:.55rem;
+  letter-spacing:.3em;
+  text-transform:uppercase;
+  margin-bottom:1.5rem;
+  text-shadow:0 0 12px rgba(155,188,15,.6);
+  font-family:var(--pixel);
+}
+.gamebrent{
+  width:360px;
+  background:var(--gb-body);
+  border-radius:12px 12px 40px 40px;
+  box-shadow:
+    inset -4px -4px 8px rgba(0,0,0,.25),
+    inset 4px 4px 8px rgba(255,255,255,.6),
+    0 20px 60px rgba(0,0,0,.7),
+    0 4px 20px rgba(0,0,0,.5);
+  position:relative;
+  padding-bottom:24px;
+}
+.gamebrent::before{
+  content:'';
+  position:absolute;
+  top:54%;
+  left:0;right:0;
+  height:3px;
+  background:linear-gradient(90deg,transparent 0%,var(--gb-body-dark) 15%,var(--gb-body-shadow) 50%,var(--gb-body-dark) 85%,transparent 100%);
+}
+.gb-top{padding:20px 20px 0;}
+.gb-dotmatrix-label{
+  font-family:var(--pixel);
+  font-size:.28rem;
+  color:var(--gb-label);
+  letter-spacing:.15em;
+  text-align:center;
+  margin-bottom:6px;
+  opacity:.7;
+}
+.gb-screen-bezel{
+  background:var(--gb-screen-bezel);
+  border-radius:8px 8px 20px 20px;
+  padding:14px 16px 20px;
+  box-shadow:inset 0 2px 8px rgba(0,0,0,.8),inset 0 0 0 2px #111;
+  position:relative;
+}
+.gb-led{
+  width:6px;height:6px;
+  border-radius:50%;
+  background:var(--gb-led);
+  box-shadow:0 0 6px var(--gb-led-glow),0 0 12px rgba(255,68,68,.4);
+  position:absolute;
+  top:8px;left:6px;
+}
+.gb-led-label{
+  position:absolute;
+  top:16px;left:4.5px;
+  font-family:var(--pixel);
+  font-size:.18rem;
+  color:#666;
+  letter-spacing:.05em;
+}
+.gb-screen{
+  background:var(--gb-screen-bg);
+  border-radius:3px;
+  width:100%;
+  aspect-ratio:160/144;
+  overflow:hidden;
+  position:relative;
+  box-shadow:inset 0 0 0 2px var(--gb-screen-dark),inset 0 2px 12px rgba(0,0,0,.4);
+}
+.gb-screen::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.06) 0px,rgba(0,0,0,.06) 1px,transparent 1px,transparent 3px);
+  pointer-events:none;
+  z-index:10;
+}
+.screen-content{
+  width:100%;height:100%;
+  overflow-y:auto;overflow-x:hidden;
+  color:var(--gb-screen-dark);
+  font-family:var(--vt);
+  font-size:1.05rem;
+  line-height:1.4;
+  padding:8px 10px;
+  scrollbar-width:none;
+  position:relative;z-index:1;
+}
+.screen-content::-webkit-scrollbar{display:none;}
+.page{display:none;min-height:100%;animation:fadeIn .3s ease;}
+.page.active{display:block;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.boot-screen{
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  height:100%;text-align:center;
+}
+.boot-logo{
+  font-family:var(--pixel);font-size:.75rem;
+  color:var(--gb-screen-dark);line-height:2;
+  animation:fadeIn .5s ease;
+}
+.boot-blink{
+  font-size:.6rem;color:var(--gb-screen-dark);
+  margin-top:10px;animation:blink 1s step-end infinite;
+}
+.scr-h1{
+  font-family:var(--pixel);font-size:.42rem;
+  color:var(--gb-screen-dark);
+  border-bottom:2px solid var(--gb-screen-dark);
+  padding-bottom:4px;margin-bottom:8px;
+  letter-spacing:.04em;text-transform:uppercase;
+}
+.scr-h2{
+  font-family:var(--pixel);font-size:.32rem;
+  color:var(--gb-screen-dark);margin:8px 0 4px;
+}
+.scr-p{
+  font-size:.95rem;color:var(--gb-screen-dark);
+  margin-bottom:6px;line-height:1.5;
+}
+.scr-tag{
+  display:inline-block;
+  border:1px solid var(--gb-screen-dark);
+  font-size:.75rem;padding:1px 4px;
+  margin:1px 2px;border-radius:1px;
+}
+.scr-link{
+  color:var(--gb-screen-dark);font-size:.85rem;
+  border-bottom:1px solid;text-decoration:none;
+}
+.scr-link:hover{opacity:.7;}
+.scr-divider{border:none;border-top:1px solid var(--gb-screen-dark);margin:6px 0;opacity:.4;}
+.scr-avatar{
+  font-family:var(--pixel);font-size:.38rem;
+  border:2px solid var(--gb-screen-dark);
+  padding:6px;text-align:center;line-height:1.8;margin-bottom:8px;
+}
+.menu-item{
+  font-family:var(--pixel);font-size:.38rem;
+  padding:5px 8px;cursor:pointer;
+  display:flex;align-items:center;gap:6px;
+  border-radius:2px;transition:background .15s;
+}
+.menu-item:hover,.menu-item.selected{
+  background:var(--gb-screen-dark);
+  color:var(--gb-screen-lightest);
+}
+.menu-cursor{color:var(--gb-screen-dark);font-size:.45rem;}
+.stat-row{
+  display:flex;justify-content:space-between;
+  font-size:.9rem;padding:2px 0;
+  border-bottom:1px dashed rgba(48,98,48,.3);
+}
+.stat-val{font-family:var(--pixel);font-size:.3rem;}
+.proj-card{
+  border:2px solid var(--gb-screen-dark);
+  padding:6px 8px;margin-bottom:8px;border-radius:2px;
+}
+.proj-title{font-family:var(--pixel);font-size:.33rem;margin-bottom:4px;}
+.proj-desc{font-size:.85rem;}
+.skills-grid{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px;}
+.gb-brand{
+  text-align:center;margin-top:10px;
+  font-family:var(--pixel);font-size:.26rem;
+  color:var(--gb-label);letter-spacing:.1em;
+}
+.gb-brand span{font-style:italic;letter-spacing:.02em;}
+.gb-controls{
+  padding:16px 20px 0;
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  gap:0;align-items:center;
+}
+.dpad{position:relative;width:72px;height:72px;justify-self:start;z-index: 60;touch-action: none;}
+
+.dpad-h,.dpad-v{
+  position:absolute;background:var(--gb-dpad);border-radius:3px;
+  box-shadow:inset 1px 1px 2px rgba(255,255,255,.15),inset -1px -1px 2px rgba(0,0,0,.4),0 2px 4px rgba(0,0,0,.4);
+}
+.dpad-h{width:72px;height:24px;top:50%;left:50%;transform:translate(-50%,-50%);}
+.dpad-v{width:24px;height:72px;top:50%;left:50%;transform:translate(-50%,-50%);}
+.dpad-center{
+  position:absolute;width:24px;height:24px;
+  background:var(--gb-dpad);top:50%;left:50%;
+  transform:translate(-50%,-50%);border-radius:2px;
+  box-shadow:inset 1px 1px 2px rgba(255,255,255,.1),inset -1px -1px 2px rgba(0,0,0,.3);
+}
+.dpad-arrow{position:absolute;width:0;height:0;opacity:.4;}
+.dpad-arrow.up{border-left:4px solid transparent;border-right:4px solid transparent;border-bottom:5px solid rgba(255,255,255,.6);top:3px;left:50%;transform:translateX(-50%);}
+.dpad-arrow.dn{border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid rgba(255,255,255,.6);bottom:3px;left:50%;transform:translateX(-50%);}
+.dpad-arrow.lt{border-top:4px solid transparent;border-bottom:4px solid transparent;border-right:5px solid rgba(255,255,255,.6);left:3px;top:50%;transform:translateY(-50%);}
+.dpad-arrow.rt{border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:5px solid rgba(255,255,255,.6);right:3px;top:50%;transform:translateY(-50%);}
+.gb-mid-buttons{display:flex;flex-direction:column;align-items:center;gap:6px;}
+.gb-sel-start{display:flex;gap:12px;}
+.ss-btn-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.ss-btn{
+  width:32px;height:10px;
+  background:var(--gb-start-sel);border-radius:5px;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.5),inset 0 -1px 1px rgba(255,255,255,.1),0 1px 3px rgba(0,0,0,.4);
+  cursor:pointer;transition:transform .1s,box-shadow .1s;
+}
+.ss-btn:active{transform:scale(.95) translateY(1px);box-shadow:inset 0 2px 3px rgba(0,0,0,.6);}
+.ss-label{font-family:var(--pixel);font-size:.18rem;color:var(--gb-label);letter-spacing:.05em;}
+.ab-buttons{justify-self:end;position:relative;width:80px;height:72px;}
+.ab-btn{
+  position:absolute;width:28px;height:28px;
+  border-radius:50%;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--pixel);font-size:.28rem;
+  color:rgba(255,255,255,.85);font-weight:bold;
+  transition:transform .1s,box-shadow .1s;user-select:none;
+}
+.ab-btn:active{transform:scale(.92) translateY(1px);}
+.btn-b{
+  background: radial-gradient(circle at 35% 35%, #1e6fbf, var(--gb-ab-dark));
+  box-shadow: inset -2px -2px 4px rgba(0,0,0,.4),
+              inset 1px 1px 3px rgba(255,255,255,.25),
+              0 3px 6px rgba(0,0,0,.4);
+  bottom:0;
+  left:0;
+}
+
+.btn-a{
+  background: radial-gradient(circle at 35% 35%, #1e6fbf, var(--gb-ab-dark));
+  box-shadow: inset -2px -2px 4px rgba(0,0,0,.4),
+              inset 1px 1px 3px rgba(255,255,255,.25),
+              0 3px 6px rgba(0,0,0,.4);
+  top:0;
+  right:0;
+}
+.btn-b:active,.btn-a:active{box-shadow:inset 2px 2px 4px rgba(0,0,0,.5),inset -1px -1px 2px rgba(255,255,255,.1),0 1px 3px rgba(0,0,0,.4);}
+.ab-labels{position:absolute;bottom:-14px;left:0;right:0;display:flex;justify-content:space-between;padding:0 2px;}
+.ab-label{font-family:var(--pixel);font-size:.18rem;color:var(--gb-label);}
+.gb-speaker{
+  margin:18px 20px 0;
+  display:flex;justify-content:flex-end;
+  gap:4px;padding-right:12px;
+}
+.speaker-dot{
+  width:4px;height:4px;border-radius:50%;
+  background:var(--gb-speaker);
+  box-shadow:inset 0 1px 1px rgba(0,0,0,.3);
+}
+.speaker-col{display:flex;flex-direction:column;gap:4px;}
+.speaker-col:nth-child(1){margin-top:8px;}
+.speaker-col:nth-child(2){margin-top:4px;}
+.speaker-col:nth-child(3){margin-top:0;}
+.speaker-col:nth-child(4){margin-top:4px;}
+.speaker-col:nth-child(5){margin-top:8px;}
+.gb-bottom-details{
+  display:flex;justify-content:space-between;align-items:flex-end;
+  padding:12px 20px 8px;margin-top:4px;
+}
+.gb-phones-label{font-family:var(--pixel);font-size:.16rem;color:var(--gb-label);letter-spacing:.05em;opacity:.6;}
+.gb-model{font-family:var(--pixel);font-size:.16rem;color:var(--gb-label);opacity:.5;text-align:center;}
+.nav-hint{
+  margin-top:1rem;
+  font-family:var(--pixel);font-size:.28rem;
+  color:rgba(155,188,15,.5);text-align:center;letter-spacing:.08em;
+}
+@media(max-width:400px){
+  .gamebrent{width:310px;}
+  .dpad{width:60px;height:60px;}
+  .dpad-h{width:60px;height:20px;}
+  .dpad-v{width:20px;height:60px;}
+  .dpad-center{width:20px;height:20px;}
+  .ab-btn{width:24px;height:24px;}
+  .ab-buttons{width:68px;height:60px;}
+}
+</style>
+</head>
+<body>
+
+<p class="page-title">★ B-Games Portfolio ★</p>
+
+<div class="gamebrent" role="main">
+  <div class="gb-top">
+    <div class="gb-dotmatrix-label">SEE WHAT THE HYPE IS ABOUT</div>
+    <div class="gb-screen-bezel">
+      <div class="gb-led" title="Power ON"></div>
+      <span class="gb-led-label">PWR</span>
+
+      <div class="gb-screen" aria-label="Portfolio screen">
+        <div class="screen-content" id="screenContent">
+
+          <!-- MENU PAGE -->
+          <div class="page active" id="page-menu">
+            <div class="boot-screen">
+              <div class="boot-logo">
+                ★  B-GAMES  ★<br>
+                BRENT GOLDSTEIN<br>
+                ─────────────
+              </div>
+              <div style="margin-top:10px;width:100%;">
+                <div class="menu-item selected" onclick="showPage('home')" tabindex="0">
+                  <span class="menu-cursor">►</span> PROFILE
+                </div>
+                <div class="menu-item" onclick="showPage('about')" tabindex="0">
+                  <span class="menu-cursor" style="opacity:0">►</span> ABOUT
+                </div>
+                <div class="menu-item" onclick="showPage('skills')" tabindex="0">
+                  <span class="menu-cursor" style="opacity:0">►</span> SKILLS
+                </div>
+                <div class="menu-item" onclick="showPage('projects')" tabindex="0">
+                  <span class="menu-cursor" style="opacity:0">►</span> PROJECTS
+                </div>
+                <div class="menu-item" onclick="showPage('contact')" tabindex="0">
+                  <span class="menu-cursor" style="opacity:0">►</span> CONTACT
+                </div>
+                <div class="menu-item" onclick="showPage('return')" tabindex="0">
+                  <span class="menu-cursor" style="opacity:0">►</span> RETURN
+                </div>
+              </div>
+              <div class="boot-blink" style="margin-top:10px;">PRESS START</div>
+            </div>
+          </div>
+
+          <!-- PROFILE PAGE -->
+          <div class="page" id="page-home">
+            <p class="scr-h1">◀ PROFILE</p>
+            <div class="scr-avatar">
+              [  BRENT  ]<br>
+              [ GOLDSTEIN]<br>
+              [  B-GAMES ]
+            </div>
+            <div class="stat-row"><span>CLASS</span><span class="stat-val">ENGINEER</span></div>
+            <div class="stat-row"><span>ROLE</span><span class="stat-val">GAME DEV</span></div>
+            <div class="stat-row"><span>GUILD</span><span class="stat-val">RPI JAM CLUB</span></div>
+            <div class="stat-row"><span>EXP</span><span class="stat-val">3+ YRS</span></div>
+            <div class="stat-row"><span>INTERN</span><span class="stat-val">WB GAMES</span></div>
+            <div class="stat-row"><span>SCHOOL</span><span class="stat-val">RPI SENIOR</span></div>
+            <hr class="scr-divider"/>
+            <p class="scr-p">Sole proprietor of B-Games since Sep 2019. Passionate programmer, designer &amp; creator.</p>
+            <div style="text-align:center;margin-top:6px;"><span class="scr-tag">B:MENU · SEL:SCROLL</span></div>
+          </div>
+
+          <!-- ABOUT PAGE -->
+          <div class="page" id="page-about">
+            <p class="scr-h1">◀ ABOUT</p>
+            <p class="scr-h2">// B-GAMES</p>
+            <p class="scr-p">Our mission: create fun, innovative games that inspire people worldwide. Passion in programming to bring imagination to life.</p>
+            <hr class="scr-divider"/>
+            <p class="scr-h2">// THE OWNER</p>
+            <p class="scr-p">Hi! I'm Brent. I founded B-Games in my junior year of high school (2019) and have been expanding ever since.</p>
+            <p class="scr-p">Interned at Warner Bros. Games Central Game Technology — automated testing frameworks and pipelines.</p>
+            <p class="scr-p">Active member of RPI Game Jam Club with multiple shipped games.</p>
+            <div style="text-align:center;margin-top:6px;"><span class="scr-tag">B:MENU · SEL:SCROLL</span></div>
+          </div>
+
+          <!-- SKILLS PAGE -->
+          <div class="page" id="page-skills">
+            <p class="scr-h1">◀ SKILLS</p>
+            <p class="scr-h2">// LANGUAGES</p>
+            <div class="skills-grid">
+              <span class="scr-tag">C</span><span class="scr-tag">C++</span><span class="scr-tag">C#</span><span class="scr-tag">Java</span><span class="scr-tag">JS</span><span class="scr-tag">HTML</span><span class="scr-tag">CSS</span><span class="scr-tag">Haskell</span><span class="scr-tag">MIPS</span><span class="scr-tag">Prolog</span>
+            </div>
+            <p class="scr-h2">// ENGINES</p>
+            <div class="skills-grid">
+              <span class="scr-tag">Unreal 4</span><span class="scr-tag">Godot</span><span class="scr-tag">GM Studio 2</span><span class="scr-tag">Unity/VS</span>
+            </div>
+            <p class="scr-h2">// TOOLS</p>
+            <div class="skills-grid">
+              <span class="scr-tag">Git</span><span class="scr-tag">GitHub</span><span class="scr-tag">Perforce</span><span class="scr-tag">Blender</span><span class="scr-tag">Photoshop</span><span class="scr-tag">ImGui</span><span class="scr-tag">JUnit</span><span class="scr-tag">Gauntlet</span>
+            </div>
+            <p class="scr-h2">// PLATFORMS</p>
+            <div class="skills-grid">
+              <span class="scr-tag">Windows</span><span class="scr-tag">macOS</span><span class="scr-tag">Linux</span><span class="scr-tag">Ubuntu</span>
+            </div>
+            <div style="text-align:center;margin-top:6px;"><span class="scr-tag">B:MENU · SEL:SCROLL</span></div>
+          </div>
+
+          <!-- PROJECTS PAGE -->
+          <div class="page" id="page-projects">
+            <p class="scr-h1">◀ PROJECTS</p>
+            <div class="proj-card">
+              <p class="proj-title">★ GAME JAMS</p>
+              <p class="proj-desc">Multiple shipped games w/ RPI Game Jam Club. Speed &amp; creativity under pressure.</p>
+              <a href="https://gorillabman.itch.io/" target="_blank" class="scr-link">→ ITCH.IO</a>
+            </div>
+            <div class="proj-card">
+              <p class="proj-title">★ OPEN SOURCE</p>
+              <p class="proj-desc">Repos spanning Godot, UE4 &amp; custom tools. From engines to experiments.</p>
+              <a href="https://github.com/bman7222" target="_blank" class="scr-link">→ GITHUB</a>
+            </div>
+            <div class="proj-card">
+              <p class="proj-title">★ WB GAMES INTERN</p>
+              <p class="proj-desc">Central Game Tech. Automated C++ unit testing w/ Gauntlet framework.</p>
+              <a href="https://www.linkedin.com/in/brent-goldstein-638aa41b7/" target="_blank" class="scr-link">→ LINKEDIN</a>
+            </div>
+            <div style="text-align:center;margin-top:4px;"><span class="scr-tag">B:MENU · SEL:SCROLL</span></div>
+          </div>
+
+          <!-- CONTACT PAGE -->
+          <div class="page" id="page-contact">
+            <p class="scr-h1">◀ CONTACT</p>
+            <p class="scr-h2">// EMAIL</p>
+            <p class="scr-p"><a href="mailto:bman7222@icloud.com" class="scr-link">bman7222@icloud.com</a></p>
+            <hr class="scr-divider"/>
+            <p class="scr-h2">// FIND ME</p>
+            <div class="stat-row"><span>GITHUB</span><a href="https://github.com/bman7222" target="_blank" class="scr-link stat-val">→ LINK</a></div>
+            <div class="stat-row"><span>LINKEDIN</span><a href="https://www.linkedin.com/in/brent-goldstein-638aa41b7/" target="_blank" class="scr-link stat-val">→ LINK</a></div>
+            <div class="stat-row"><span>ITCH.IO</span><a href="https://gorillabman.itch.io/" target="_blank" class="scr-link stat-val">→ LINK</a></div>
+            <div class="stat-row"><span>RESUME</span><a href="Brent_Goldstein_Resume.pdf" target="_blank" class="scr-link stat-val">→ PDF</a></div>
+            <hr class="scr-divider"/>
+            <p class="scr-p" style="text-align:center;">★ AVAILABLE FOR HIRE ★</p>
+            <div style="text-align:center;margin-top:4px;"><span class="scr-tag">B:MENU · SEL:SCROLL</span></div>
+          </div>
+
+          <!-- RETURN PAGE -->
+          <div class="page" id="page-return">
+            <p class="scr-h1">◀ RETURN</p>
+
+            <div style="text-align:center; margin-top:8px;">
+              <div class="scr-h2">Return Home?</div>
+
+              <div style="margin-top:12px; width:100%;">
+                <div class="menu-item return-option selected" data-return-index="0" tabindex="0">
+                  <span class="menu-cursor">►</span> YES
+                </div>
+                <div class="menu-item return-option" data-return-index="1" tabindex="0">
+                  <span class="menu-cursor" style="opacity:0">►</span> NO
+                </div>
+              </div>
+
+              <div style="margin-top:12px; font-size:.9rem; color:rgba(48,98,48,.9);">
+                Press A or START to confirm · B to cancel
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+      </div>
+    </div>
+
+    <div class="gb-brand">B-Games <span>GAME BRENT</span>™</div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="gb-controls">
+    <div class="dpad" id="dpad">
+      <div class="dpad-h" id="dpadH"></div>
+      <div class="dpad-v" id="dpadV"></div>
+      <div class="dpad-center"></div>
+      <div class="dpad-arrow up"></div>
+      <div class="dpad-arrow dn"></div>
+      <div class="dpad-arrow lt"></div>
+      <div class="dpad-arrow rt"></div>
+    </div>
+    <div class="gb-mid-buttons">
+      <div class="gb-sel-start">
+        <div class="ss-btn-wrap">
+          <div class="ss-btn" id="btnSelect" role="button" tabindex="0" aria-label="Select"></div>
+          <span class="ss-label">SELECT</span>
+        </div>
+        <div class="ss-btn-wrap">
+          <div class="ss-btn" id="btnStart" role="button" tabindex="0" aria-label="Start"></div>
+          <span class="ss-label">START</span>
+        </div>
+      </div>
+    </div>
+    <div class="ab-buttons">
+      <div class="ab-btn btn-b" id="btnB" role="button" tabindex="0" aria-label="B button">B</div>
+      <div class="ab-btn btn-a" id="btnA" role="button" tabindex="0" aria-label="A button">A</div>
+      <div class="ab-labels">
+        <span class="ab-label">B</span>
+        <span class="ab-label">A</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPEAKER -->
+  <div class="gb-speaker" aria-hidden="true">
+    <div class="speaker-col"><div class="speaker-dot"></div><div class="speaker-dot"></div><div class="speaker-dot"></div><div class="speaker-dot"></div></div>
+    <div class="speaker-col"><div class="speaker-dot"></div><div class="speaker-dot"></div><div class="speaker-dot"></div><div class="speaker-dot"></div></div>
+    <div class="speaker-col"><div class="speaker-dot"></div><div class="speaker-dot"></div><div class="speaker-dot"></div><div class="speaker-dot"></div></div>
+    <div class="speaker-col"><div class="speaker-dot"></div><div class="speaker-dot"></div><div class="speaker-dot"></div><div class="speaker-dot"></div></div>
+    <div class="speaker-col"><div class="speaker-dot"></div><div class="speaker-dot"></div><div class="speaker-dot"></div><div class="speaker-dot"></div></div>
+  </div>
+
+  <div class="gb-bottom-details">
+    <span class="gb-phones-label">◁ B SOUND</span>
+    <span class="gb-model">MODEL NO. DMG-BG-01 ©2026</span>
+    <span class="gb-phones-label">VOL ▷</span>
+  </div>
+</div>
+
+<p class="nav-hint">▲▼=NAVIGATE · A=SELECT · B=BACK · START=MENU</p>
+
+<script>
+const menuItems=['home','about','skills','projects','contact','return'];
+let currentPage='menu', menuIndex=0;
+
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const el=document.getElementById('page-'+name);
+  if(el){el.classList.add('active');currentPage=name;}
+  document.getElementById('screenContent').scrollTop=0;
+  updateCursors();
+  if (name === 'return') {
+    returnIndex = 0;
+    updateReturnCursors();
+  }
+}
+
+function updateCursors(){
+  document.querySelectorAll('.menu-item').forEach((el,i)=>{
+    const c=el.querySelector('.menu-cursor');
+    if(i===menuIndex){c.style.opacity='1';el.classList.add('selected');}
+    else{c.style.opacity='0';el.classList.remove('selected');}
+  });
+}
+
+// return page state
+let returnIndex = 0; // 0 = YES, 1 = NO
+
+function updateReturnCursors() {
+  const opts = Array.from(document.querySelectorAll('.return-option'));
+  opts.forEach((el, i) => {
+    const cursor = el.querySelector('.menu-cursor');
+    if (i === returnIndex) {
+      el.classList.add('selected');
+      if (cursor) cursor.style.opacity = '1';
+      el.scrollIntoView({ block: 'nearest' });
+    } else {
+      el.classList.remove('selected');
+      if (cursor) cursor.style.opacity = '0';
+    }
+  });
+}
+
+function navDown() {
+  if (currentPage === 'menu') {
+    if (!Array.isArray(menuItems) || menuItems.length === 0) return;
+    menuIndex = (menuIndex + 1) % menuItems.length;
+    updateCursors();
+    return;
+  } else if (currentPage === 'return') {
+    returnIndex = (returnIndex + 1) % 2;
+    updateReturnCursors();
+    return;
+  } else {
+    if (typeof handleScrollDown === 'function') handleScrollDown();
+    return;
+  }
+}
+
+function navUp() {
+  if (currentPage === 'menu') {
+    if (!Array.isArray(menuItems) || menuItems.length === 0) return;
+    menuIndex = (menuIndex - 1 + menuItems.length) % menuItems.length;
+    updateCursors();
+    return;
+  } else if (currentPage === 'return') {
+    returnIndex = (returnIndex - 1 + 2) % 2;
+    updateReturnCursors();
+    return;
+  } else {
+    if (typeof handleScrollUp === 'function') handleScrollUp();
+    return;
+  }
+}
+
+
+function handleA() {
+  // If on the return page, confirm selection
+  if (currentPage === 'return') {
+    if (returnIndex === 0) {
+      // YES -> go home
+      window.location.href = 'index.html';
+    } else {
+      // NO -> go back to menu
+      showPage('menu');
+    }
+    return;
+  }
+
+  // original behavior
+  if (currentPage === 'menu') showPage(menuItems[menuIndex]);
+}
+
+function handleB() {
+  // If on return page, treat B as cancel (back to menu)
+  if (currentPage === 'return') {
+    showPage('menu');
+    return;
+  }
+
+  // original behavior
+  if (currentPage !== 'menu') showPage('menu');
+}
+
+function handleScrollDown(){
+  // existing scroll behavior for non-menu pages
+  if (currentPage !== 'menu') {
+    const atBottom = sc.scrollTop + sc.clientHeight >= sc.scrollHeight - 2;
+    if (atBottom) {
+      sc.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      sc.scrollBy({ top: 48, behavior: 'smooth' });
+    }
+    return;
+  }
+}
+
+function handleScrollUp() {
+  // only apply on non-menu pages (keeps menu behavior unchanged)
+  if (currentPage === 'menu') return;
+
+  const sc = document.getElementById('screenContent');
+  if (!sc) return;
+
+  // consider near‑top as top (small tolerance)
+  const atTop = sc.scrollTop <= 2;
+
+  if (!atTop) {
+    sc.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+
+function handleSelect() {
+  const sc = document.getElementById('screenContent');
+
+  // If on return page, toggle YES/NO (no scrolling)
+  if (currentPage === 'return') {
+    returnIndex = (returnIndex + 1) % 2;
+    updateReturnCursors();
+    return;
+  }
+
+  handleScroll()
+
+  // if on menu, cycle menu cursor
+  menuIndex = (menuIndex + 1) % menuItems.length;
+  updateCursors();
+}
+
+function handleStart() {
+  // If on return page, treat START same as A (confirm)
+  if (currentPage === 'return') {
+    if (returnIndex === 0) {
+      window.location.href = 'index.html';
+    } else {
+      showPage('menu');
+    }
+    return;
+  }
+
+  // original behavior: if on menu, open selected item; otherwise go to menu
+  if (currentPage === 'menu') {
+    showPage(menuItems[menuIndex]);
+  } else {
+    showPage('menu');
+    return;
+  }
+}
+
+// Button events
+document.getElementById('btnA').addEventListener('click',handleA);
+document.getElementById('btnB').addEventListener('click',handleB);
+document.getElementById('btnStart').addEventListener('click',handleStart);
+document.getElementById('btnSelect').addEventListener('click',handleSelect);
+
+// D-pad
+document.getElementById('dpadV').addEventListener('click',e=>{
+  const r=e.currentTarget.getBoundingClientRect();
+  e.clientY-r.top < r.height/2 ? navUp() : navDown();
+});
+document.getElementById('dpadH').addEventListener('click',e=>{
+  const r=e.currentTarget.getBoundingClientRect();
+  e.clientX-r.left > r.width/2 ? handleA() : handleB();
+});
+
+// Menu item clicks
+document.querySelectorAll('.menu-item').forEach((el,i)=>{
+  el.addEventListener('click',()=>{menuIndex=i;showPage(menuItems[i]);});
+});
+
+// Keyboard
+document.addEventListener('keydown',e=>{
+  const map={ArrowDown:navDown,ArrowUp:navUp,Enter:handleA,z:handleA,Z:handleA,x:handleB,X:handleB,' ':handleStart,Escape:handleStart};
+  if(map[e.key]){map[e.key]();if(e.key===' ')e.preventDefault();}
+});
+
+updateCursors();
+</script>
+</body>
+</html>
