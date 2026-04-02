@@ -13,10 +13,6 @@
     /* ─── RESET & TOKENS ─────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    html {
-      color-scheme: light;
-    }
-
     :root {
       --green:   #0cf53f;
       --green2:  #09c34a;
@@ -34,9 +30,10 @@
       --line-thickness: 2px;
       --grid-strong: rgba(9,195,74,0.35);
       --grid-faint: rgba(9,195,74,0.12); 
+      color-scheme: light;
     }
 
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; color-scheme: light;}
 
     body {
       background: var(--bg);
