@@ -26,9 +26,7 @@
       --radius:  6px;
       --mono:    'Poppins', monospace;
       --sans:    'Kulim Park', sans-serif;
-      --grid-size: 40px;
       --line-thickness: 2px;
-      --grid-size: 48px;
       --line-thickness: 2px;
       --grid-strong: rgba(9,195,74,0.35);
       --grid-faint: rgba(9,195,74,0.12); 
@@ -147,12 +145,16 @@
       position: relative;
       overflow: hidden;
       background: var(--bg);
+      isolation: isolate; 
     }
 
     .hero::before, .hero::after {
       content: '';
       position: absolute;
-      inset: -20%; /* much smaller than -150% */
+      left: -20%;
+      right: -20%;
+      top: -20%;
+      bottom: -20%;
       background-size: 48px 48px;
       background-repeat: repeat;
       pointer-events: none;
@@ -162,12 +164,13 @@
       backface-visibility: hidden;
       contain: paint;
     }
-    .hero::before { background-image:url('grid-strong.png'); animation:moveS 60s linear infinite; }
-    .hero::after  { background-image:url('grid-faint.png');  animation:moveF 120s linear infinite; }
-    @keyframes moveS { from{transform:translate3d(12%,12%,0)} to{transform:translate3d(-12%,-12%,0)} }
-    @keyframes moveF { from{transform:translate3d(-8%,-8%,0)} to{transform:translate3d(8%,8%,0)} }
 
+    /* ease-in-out + alternate for smooth reversal, halved distance */
+    .hero::before { background-image:url('grid-strong.png'); animation: moveS 20s linear infinite; }
+    .hero::after  { background-image:url('grid-faint.png');  animation: moveF 40s linear infinite; }
 
+    @keyframes moveS { from{transform:translate3d(0,0,0)} to{transform:translate3d(-48px,-48px,0)} }
+    @keyframes moveF { from{transform:translate3d(0,0,0)} to{transform:translate3d(48px,48px,0)} }
 
     /* ensure content sits above the grids */
     .hero > .hero-inner,
@@ -196,27 +199,26 @@
       align-items: center;
       max-width: 1100px;
       width: 100%;
-      position: relative; z-index: 2;
+      position: relative;
+      z-index: 2;
     }
 
-    .hero__tag {
-      display: inline-flex; align-items: center; gap: .5rem;
-      font-family: var(--mono); font-size: .75rem;
-      color: var(--green); letter-spacing: .1em; text-transform: uppercase;
-      border: 1px solid var(--border);
-      padding: .3rem .8rem; border-radius: 2rem;
-      margin-bottom: 1.5rem;
-      animation: fadeUp .6s ease both;
-    }
-    .hero__tag::before {
-      content: ''; width: 6px; height: 6px;
-      background: var(--green); border-radius: 50%;
-      animation: pulse 2s ease infinite;
+    .hero__inner > div:first-child {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
     }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: .4; transform: scale(.7); }
+    .hero__box {
+      width: fit-content;
+      box-sizing: border-box;
+      background: #000;
+      border: 3px solid #fff;
+      border-radius: 4px;
+      padding: .75rem 1rem;
+      background-clip: padding-box;
+      position: relative;
+      z-index: 20;
     }
 
     .hero__name {
@@ -225,14 +227,56 @@
       line-height: 1;
       letter-spacing: -3px;
       color: #fff;
+      margin: 0;
       animation: fadeUp .6s .1s ease both;
+      position: relative;
+      z-index: 21;
     }
+
     .hero__name em {
       font-style: normal;
+      display: inline-block;
       background: linear-gradient(135deg, var(--green) 0%, var(--green2) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+      color: transparent;
+      position: relative;
+      z-index: 22;
+    }
+
+    .hero__tag {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      font-family: var(--mono);
+      font-size: .75rem;
+      color: var(--green);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      border: 3px solid var(--green2);
+      padding: .3rem .8rem;
+      border-radius: 2rem;
+      margin-bottom: 1.5rem;
+      animation: fadeUp .6s ease both;
+      background: #000;
+      background-clip: padding-box;
+      position: relative;
+      z-index: 10;
+    }
+
+    .hero__tag::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: var(--green2);
+      border-radius: 50%;
+      animation: pulse 2s ease infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: .4; transform: scale(.7); }
     }
 
     .hero__roles {
@@ -240,20 +284,35 @@
       margin: 1.5rem 0 2rem;
       animation: fadeUp .6s .2s ease both;
     }
+
     .hero__role {
-      font-family: var(--mono); font-size: .75rem;
-      color: var(--muted); letter-spacing: .06em;
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: .75rem;
+      color: #fff;             
+      letter-spacing: .06em;
       padding: .3rem .8rem;
-      border: 1px solid rgba(255,255,255,.1);
+      border: 3px solid #fff; 
       border-radius: 4px;
+      background: #000;          
+      background-clip: padding-box; 
+      position: relative;
+      z-index: 10; 
     }
 
     .hero__desc {
       font-size: 1.05rem;
-      color: var(--muted);
+      color: #fff;      
       max-width: 520px;
       line-height: 1.75;
       animation: fadeUp .6s .3s ease both;
+      position: relative;
+      z-index: 10; 
+      padding: .3rem .8rem;
+      border: 3px solid #fff; 
+      border-radius: 4px;
+      background: #000;          
+      background-clip: padding-box; 
     }
 
     .hero__actions {
@@ -275,9 +334,15 @@
     }
     .btn--primary:hover { background: #fff; transform: translateY(-2px); }
     .btn--outline {
-      background: transparent;
-      border: 1px solid rgba(255,255,255,.2);
-      color: var(--text);
+      color: #fff;             
+      letter-spacing: .06em;
+      padding: .3rem .8rem;
+      border: 3px solid #fff; 
+      border-radius: 4px;
+      background: #000;          
+      background-clip: padding-box; 
+      position: relative;
+      z-index: 10; 
     }
     .btn--outline:hover { border-color: var(--green); color: var(--green); transform: translateY(-2px); }
 
@@ -552,7 +617,9 @@
     <div class="hero__inner">
       <div>
         <span class="hero__tag">Available for hire</span>
+        <div class="hero__box">
         <h1 class="hero__name">Brent<br><em>Goldstein</em></h1>
+        </div>
         <div class="hero__roles">
           <span class="hero__role">Machine Learning and Data Science</span>
           <span class="hero__role">Software Engineer</span>
@@ -604,7 +671,7 @@
     </div>
   </div>
 
-  <!-- ── ABOUT ────────────────────────────────────────────────────── -->
+<!-- ── ABOUT ────────────────────────────────────────────────────── -->
   <section id="about">
     <div class="section">
       <p class="section__label">01 — About</p>
@@ -618,8 +685,9 @@
           <p>B-Games is a sole proprietorship founded by Brent Maxwell Goldstein. Projects and game jams are viewable on <a href="https://github.com/bman7222" target="_blank">GitHub</a> and <a href="https://gorillabman.itch.io/" target="_blank">Itch.io</a>.</p>
 
           <h3 style="color:#fff; font-size:1.2rem; margin: 2rem 0 1rem;">Hi, I'm Brent</h3>
-          <p>I created B-Games in September 2019 during my junior year of high school and have been expanding it ever since. I'm a passionate programmer with deep experience in algorithms, data structures, computer organization, and software engineering principles.</p>
-          <p>I interned at <strong style="color:#fff">Warner Bros. Games Central Game Technology</strong> where I worked on automated unit testing and frameworks. I'm also an active game designer who has completed many game jams with the RPI Game Jam Club.</p>
+          <p>I created B-Games in September 2019 during my junior year of high school and have been building ever since. I'm a machine learning engineer and data scientist with a strong foundation in algorithms, data structures, and software engineering.</p>
+          <p>At <strong style="color:#fff">ADP</strong> I work as an Associate ML Engineer and Data Scientist, where I've shipped products, created ML deployment pipelines, developed dashboards, and made internal tooling used by hundreds of engineers. Before that I interned at <strong style="color:#fff">Warner Bros. Games Central Game Technology</strong> working on automated unit testing and frameworks. I've also worked for <strong style="color:#fff">Amplifier Game Invest</strong> as a gameplay programmer and game designer, and I've competed in numerous game jams through the RPI Game Jam Club.</p>
+          <p>Some things I've worked on recently: cutting Onboarding onto the ADP AI Agent Platform, RAG retrieval latency, migrating 300+ models into Unity Catalog, building ADP's AI Playground dashboard, and leading the team that delivered ADP's first secure RAG system with PII scanning and full session history.</p>
 
           <div class="about__contact">
             <i class="fa fa-envelope"></i> bman7222@icloud.com
