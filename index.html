@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Kulim+Park:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
     /* ─── RESET & TOKENS ─────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -24,8 +24,14 @@
       --muted:   #888;
       --border:  rgba(12,245,63,.15);
       --radius:  6px;
-      --mono:    'Space Mono', monospace;
-      --sans:    'Syne', sans-serif;
+      --mono:    'Poppins', monospace;
+      --sans:    'Kulim Park', sans-serif;
+      --grid-size: 40px;
+      --line-thickness: 2px;
+      --grid-size: 48px;
+      --line-thickness: 2px;
+      --grid-strong: rgba(9,195,74,0.35);
+      --grid-faint: rgba(9,195,74,0.12); 
     }
 
     html { scroll-behavior: smooth; }
@@ -131,35 +137,56 @@
       }
     }
 
-    /* ─── HERO ───────────────────────────────────────────────────── */
+    /* HERO */
     .hero {
       min-height: 100vh;
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       padding: 7rem clamp(1.5rem, 6vw, 6rem) 4rem;
       position: relative;
       overflow: hidden;
+      background: var(--bg);
     }
 
-    /* animated grid background */
-    .hero::before {
+    .hero::before, .hero::after {
       content: '';
-      position: absolute; inset: 0;
-      background-image:
-        linear-gradient(rgba(12,245,63,.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(12,245,63,.04) 1px, transparent 1px);
+      position: absolute;
+      inset: -20%; /* much smaller than -150% */
       background-size: 48px 48px;
-      mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+      background-repeat: repeat;
+      pointer-events: none;
+      z-index: 1;
+      transform: translate3d(0,0,0);
+      will-change: transform;
+      backface-visibility: hidden;
+      contain: paint;
     }
+    .hero::before { background-image:url('grid-strong.png'); animation:moveS 60s linear infinite; }
+    .hero::after  { background-image:url('grid-faint.png');  animation:moveF 120s linear infinite; }
+    @keyframes moveS { from{transform:translate3d(12%,12%,0)} to{transform:translate3d(-12%,-12%,0)} }
+    @keyframes moveF { from{transform:translate3d(-8%,-8%,0)} to{transform:translate3d(8%,8%,0)} }
 
-    /* glow */
-    .hero::after {
-      content: '';
+
+
+    /* ensure content sits above the grids */
+    .hero > .hero-inner,
+    .hero__inner { position: relative; z-index: 3; }
+
+    .hero .hero-glow {
       position: absolute;
       top: 20%; left: 50%;
       transform: translateX(-50%);
       width: 600px; height: 400px;
       background: radial-gradient(ellipse, rgba(9,195,74,.12) 0%, transparent 70%);
       pointer-events: none;
+      z-index: 2;
+    }
+
+    /* reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      .hero::before,
+      .hero::after { animation: none; }
     }
 
     .hero__inner {
@@ -169,7 +196,7 @@
       align-items: center;
       max-width: 1100px;
       width: 100%;
-      position: relative; z-index: 1;
+      position: relative; z-index: 2;
     }
 
     .hero__tag {
@@ -533,8 +560,8 @@
           <span class="hero__role">Sole Proprietor</span>
         </div>
         <p class="hero__desc">
-          Passionate programmer and game developer behind <strong style="color:#fff">B-Games</strong>. 
-          Building fun, innovative games and software — from game jams to shipped products.
+          Passionate programmer, Machine Learning Engineer, Data Scientist, and Sole Proprietor of <strong style="color:#fff">B-Games</strong>. 
+          Building fun, innovative games and software — from game jams, shipped projects, and beyond.
         </p>
         <div class="hero__actions">
           <a href="https://gorillabman.itch.io/" target="_blank" class="btn btn--primary">
